@@ -370,6 +370,7 @@
         let database;
         let isConnected = false;
         let lastEventId = null; // Track the last event we processed
+        let isInitialLoad = true; // Flag to prevent popup on initial load
         
         // Firebase configuration - Your actual project values
         const firebaseConfig = {
@@ -402,14 +403,14 @@
                     }
                 });
                 
-                // 🚨 NEW: Listen for button press events (this triggers popup/sound on OTHER devices)
+                // 🚨 Listen for button press events (this triggers popup/sound on OTHER devices)
                 const eventsRef = database.ref('bahtenda/events');
                 eventsRef.on('child_added', (snapshot) => {
                     const event = snapshot.val();
                     const eventId = snapshot.key;
                     
-                    // Only process events we haven't seen before
-                    if (eventId !== lastEventId && event.type === 'button_press') {
+                    // Only process NEW events that we haven't seen before AND after initial load
+                    if (!isInitialLoad && eventId !== lastEventId && event.type === 'button_press') {
                         console.log('🚨 Remote button press detected! Playing sound and showing popup for EVERYONE...');
                         
                         // Play sound and show popup for EVERYONE (including other users)
@@ -417,8 +418,17 @@
                         showPopup();
                         
                         lastEventId = eventId;
+                    } else if (isInitialLoad) {
+                        // During initial load, just track the latest event ID without triggering popup
+                        lastEventId = eventId;
                     }
                 });
+                
+                // Mark initial load as complete after a short delay
+                setTimeout(() => {
+                    isInitialLoad = false;
+                    console.log('🟢 Initial load complete - now listening for real events');
+                }, 2000);
                 
                 // Listen for connection status
                 const connectedRef = database.ref('.info/connected');
