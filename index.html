@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BASSmentLXIX Most Important Tracker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', cursive;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            color: #fff;
+        }
+
+        .button-container {
+            margin: 40px 0;
+        }
+
+        .anotha-button {
+            background: radial-gradient(circle, #ff4444, #cc0000);
+            border: none;
+            padding: 20px 60px;
+            font-size: 2.5rem;
+            font-family: 'Bebas Neue', cursive;
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.6);
+            transition: all 0.3s ease;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 30px rgba(255, 68, 68, 0.6);
+            }
+            to {
+                box-shadow: 0 0 50px rgba(255, 68, 68, 0.9);
+            }
+        }
+
+        .anotha-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 60px rgba(255, 68, 68, 0.8);
+        }
+
+        .anotha-button:active {
+            transform: scale(0.98);
+        }
+
+        .chalkboard {
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(45deg, #2a4a2a 25%, transparent 25%),
+                linear-gradient(-45deg, #2a4a2a 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #2a4a2a 75%),
+                linear-gradient(-45deg, transparent 75%, #2a4a2a 75%),
+                #1a3a1a;
+            background-size: 100px 100px, 80px 80px, 20px 20px, 20px 20px, 20px 20px, 20px 20px;
+            border: 8px solid #8B4513;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.3);
+            width: 80vw;
+            position: relative;
+        }
+
+        .chalkboard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255,255,255,0.03) 2px,
+                rgba(255,255,255,0.03) 4px
+            );
+            pointer-events: none;
+        }
+
+        .chalkboard h2 {
+            color: #f0f0f0;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+        }
+
+        .tally-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            min-height: 60px;
+        }
+
+        .tally-group {
+            display: inline-block;
+            position: relative;
+            margin: 5px;
+        }
+
+        .tally-mark {
+            width: 4px;
+            height: 40px;
+            background: #f0f0f0;
+            display: inline-block;
+            margin: 0 2px;
+            border-radius: 2px;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .tally-diagonal {
+            position: absolute;
+            top: 0;
+            left: -2px;
+            width: 40px;
+            height: 4px;
+            background: #f0f0f0;
+            transform: rotate(45deg);
+            transform-origin: left;
+            border-radius: 2px;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .counter-display {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: #f0f0f0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .image-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .popup-content {
+            max-width: 80%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(255,255,255,0.3);
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.5); }
+            to { transform: scale(1); }
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 3rem;
+            color: white;
+            cursor: pointer;
+            background: none;
+            border: none;
+            z-index: 1001;
+        }
+
+        .reset-button {
+            background: rgba(128, 128, 128, 0.7) !important;
+            border: 2px solid #666 !important;
+            padding: 10px 20px !important;
+            font-size: 1rem !important;
+            font-family: 'Bebas Neue', cursive !important;
+            color: white !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            margin-top: 20px !important;
+            transition: all 0.3s ease !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .reset-button:hover {
+            background: rgba(150, 150, 150, 0.8);
+            border-color: #888;
+            transform: scale(1.02);
+        }
+
+        .reset-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .reset-modal-content {
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #444;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            max-width: 400px;
+        }
+
+        .reset-modal h3 {
+            color: #ff4444;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .reset-modal input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: #333;
+            color: white;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .reset-modal input:focus {
+            outline: none;
+            border-color: #ff4444;
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-family: 'Bebas Neue', cursive;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-button {
+            background: #ff4444;
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background: #ff6666;
+            transform: scale(1.02);
+        }
+
+        .cancel-button {
+            background: #666;
+            color: white;
+        }
+
+        .cancel-button:hover {
+            background: #888;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BASSmentLXIX Most Important Tracker</h1>
+        
+        <div class="button-container">
+            <button class="anotha-button" onclick="anothaOne()">ANOTHA ONE</button>
+        </div>
+
+        <div class="chalkboard">
+            <h2>BAHtenda moments</h2>
+            <div class="tally-container" id="tallyContainer">
+                <!-- Tally marks will be added here -->
+            </div>
+            <div class="counter-display">
+                Total: <span id="counter">0</span>
+            </div>
+        </div>
+        
+        <button class="reset-button" onclick="showResetModal()">Reset Tally</button>
+    </div>
+
+    <!-- Image Popup -->
+    <div class="image-popup" id="imagePopup" onclick="closePopup()">
+        <button class="close-popup" onclick="closePopup()">&times;</button>
+        <div class="popup-content">
+            <img id="popupImage" src="" alt="ANOTHA ONE!" style="max-width: 100%; max-height: 100%; border-radius: 10px;">
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="reset-modal" id="resetModal">
+        <div class="reset-modal-content">
+            <h3>Reset BAHtenda Moments</h3>
+            <p style="color: #ccc; margin-bottom: 15px;">Enter password to reset the tally:</p>
+            <input type="password" id="passwordInput" placeholder="Enter password..." maxlength="20">
+            <div class="modal-buttons">
+                <button class="modal-button cancel-button" onclick="closeResetModal()">Cancel</button>
+                <button class="modal-button confirm-button" onclick="confirmReset()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let count = 0;
+        let audioContext;
+        
+        // Initialize audio context on first user interaction
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Play DJ Khaled sound effect
+        async function playClickSound() {
+            // Try multiple file name variations for audio
+            const audioSources = [
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha-one.mp3',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha_one.mp3',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anothaone.mp3',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha-one.wav',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha_one.wav'
+            ];
+            
+            let audioPlayed = false;
+            
+            for (const audioUrl of audioSources) {
+                try {
+                    const audio = new Audio(audioUrl);
+                    audio.volume = 0.7;
+                    audio.crossOrigin = "anonymous";
+                    
+                    await audio.play();
+                    audioPlayed = true;
+                    console.log('Audio played from:', audioUrl);
+                    break;
+                } catch (error) {
+                    console.log(`Failed to play audio from: ${audioUrl}`);
+                }
+            }
+            
+            if (!audioPlayed) {
+                console.log('All audio sources failed, using fallback');
+                playFallbackSound();
+            }
+        }
+
+        function playFallbackSound() {
+            if (!audioContext) initAudio();
+            
+            // Create a more DJ Khaled-like sound effect
+            const oscillator1 = audioContext.createOscillator();
+            const oscillator2 = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator1.connect(gainNode);
+            oscillator2.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Create a chord-like effect
+            oscillator1.frequency.setValueAtTime(440, audioContext.currentTime);
+            oscillator2.frequency.setValueAtTime(554.37, audioContext.currentTime);
+            
+            oscillator1.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 0.2);
+            oscillator2.frequency.exponentialRampToValueAtTime(277.18, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator1.start(audioContext.currentTime);
+            oscillator2.start(audioContext.currentTime);
+            oscillator1.stop(audioContext.currentTime + 0.2);
+            oscillator2.stop(audioContext.currentTime + 0.2);
+        }
+
+        function anothaOne() {
+            initAudio();
+            playClickSound();
+            
+            count++;
+            updateTallyMarks();
+            document.getElementById('counter').textContent = count;
+            
+            // Show popup
+            showPopup();
+        }
+
+        function updateTallyMarks() {
+            const container = document.getElementById('tallyContainer');
+            const fullGroups = Math.floor(count / 5);
+            const remainder = count % 5;
+            
+            container.innerHTML = '';
+            
+            // Add full groups of 5
+            for (let i = 0; i < fullGroups; i++) {
+                const group = document.createElement('div');
+                group.className = 'tally-group';
+                
+                // Add 4 vertical marks
+                for (let j = 0; j < 4; j++) {
+                    const mark = document.createElement('div');
+                    mark.className = 'tally-mark';
+                    group.appendChild(mark);
+                }
+                
+                // Add diagonal mark
+                const diagonal = document.createElement('div');
+                diagonal.className = 'tally-diagonal';
+                group.appendChild(diagonal);
+                
+                container.appendChild(group);
+            }
+            
+            // Add remaining marks
+            if (remainder > 0) {
+                const group = document.createElement('div');
+                group.className = 'tally-group';
+                
+                for (let i = 0; i < remainder; i++) {
+                    const mark = document.createElement('div');
+                    mark.className = 'tally-mark';
+                    group.appendChild(mark);
+                }
+                
+                container.appendChild(group);
+            }
+        }
+
+        async function showPopup() {
+            const popup = document.getElementById('imagePopup');
+            const img = document.getElementById('popupImage');
+            
+            // Try multiple file name variations
+            const imageSources = [
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj-khaled.png',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj_khaled.png',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/djkhaled.png',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj-khaled.jpg',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj_khaled.jpg',
+                'https://github.com/whit3wolfmast3r/BAHtenda/raw/main/dj-khaled.png',
+                'https://github.com/whit3wolfmast3r/BAHtenda/raw/main/dj_khaled.png'
+            ];
+            
+            let imageLoaded = false;
+            
+            for (const src of imageSources) {
+                try {
+                    await new Promise((resolve, reject) => {
+                        const testImg = new Image();
+                        testImg.crossOrigin = "anonymous";
+                        testImg.onload = () => {
+                            img.src = src;
+                            imageLoaded = true;
+                            resolve();
+                        };
+                        testImg.onerror = reject;
+                        testImg.src = src;
+                    });
+                    break;
+                } catch (error) {
+                    console.log(`Failed to load image from: ${src}`);
+                }
+            }
+            
+            if (!imageLoaded) {
+                // Fallback to a placeholder with DJ Khaled text
+                img.src = 'data:image/svg+xml;base64,' + btoa(`
+                    <svg width="400" height="500" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100%" height="100%" fill="#1a1a1a"/>
+                        <text x="50%" y="30%" font-family="Arial, sans-serif" font-size="32" fill="#ff4444" text-anchor="middle" font-weight="bold">ANOTHA ONE!</text>
+                        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="24" fill="#fff" text-anchor="middle">🎵 DJ KHALED 🎵</text>
+                        <text x="50%" y="70%" font-family="Arial, sans-serif" font-size="18" fill="#ccc" text-anchor="middle">We the best!</text>
+                    </svg>
+                `);
+            }
+            
+            popup.style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('imagePopup').style.display = 'none';
+        }
+
+        function showResetModal() {
+            document.getElementById('resetModal').style.display = 'flex';
+            document.getElementById('passwordInput').value = '';
+            // Focus on password input after a short delay
+            setTimeout(() => {
+                document.getElementById('passwordInput').focus();
+            }, 100);
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').style.display = 'none';
+        }
+
+        function confirmReset() {
+            const password = document.getElementById('passwordInput').value;
+            const correctPassword = 'CianBrokeIt';
+            
+            if (password === correctPassword) {
+                // Reset the tally
+                count = 0;
+                updateTallyMarks();
+                document.getElementById('counter').textContent = count;
+                closeResetModal();
+                
+                // Show a brief success message
+                const button = document.querySelector('.reset-button');
+                const originalText = button.textContent;
+                button.textContent = 'Reset Successful!';
+                button.style.background = 'rgba(68, 187, 68, 0.8)';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = 'rgba(128, 128, 128, 0.7)';
+                }, 2000);
+            } else {
+                // Wrong password - shake the modal and clear input
+                const modal = document.querySelector('.reset-modal-content');
+                modal.style.animation = 'shake 0.5s ease-in-out';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').style.borderColor = '#ff4444';
+                
+                setTimeout(() => {
+                    modal.style.animation = '';
+                    document.getElementById('passwordInput').style.borderColor = '#444';
+                }, 500);
+            }
+        }
+
+        // Close popup when clicking outside the image
+        document.getElementById('imagePopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePopup();
+            }
+        });
+
+        // Keyboard support
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' || e.code === 'Enter') {
+                // Only trigger button if not in a modal
+                if (document.getElementById('resetModal').style.display !== 'flex') {
+                    e.preventDefault();
+                    anothaOne();
+                }
+            }
+            if (e.code === 'Escape') {
+                closePopup();
+                closeResetModal();
+            }
+        });
+
+        // Handle Enter key in password input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+                if (e.code === 'Enter') {
+                    confirmReset();
+                }
+            });
+        });
+
+        // Add shake animation for wrong password
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
