@@ -621,36 +621,56 @@
             const popup = document.getElementById('imagePopup');
             const img = document.getElementById('popupImage');
             
-            // Use the correct filename (dj_khaled.png with underscore)
-            const imageUrl = 'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj_khaled.png?v=' + Date.now();
+            // Try multiple filename variations for your re-uploaded image (prioritize the working one)
+            const imageUrls = [
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj-khaled.png', // ← This one works!
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj_khaled.png',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/djkhaled.png',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/DJ_Khaled.png',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/DJ-Khaled.png',
+                'https://github.com/whit3wolfmast3r/BAHtenda/raw/main/dj-khaled.png',
+                'https://github.com/whit3wolfmast3r/BAHtenda/raw/main/dj_khaled.png'
+            ];
             
-            try {
-                await new Promise((resolve, reject) => {
-                    const testImg = new Image();
-                    testImg.onload = () => {
-                        img.src = imageUrl;
-                        console.log('✅ Image loaded successfully!');
-                        resolve();
-                    };
-                    testImg.onerror = () => {
-                        console.log('❌ Image failed to load, using fallback');
-                        reject();
-                    };
-                    testImg.src = imageUrl;
-                });
-            } catch (error) {
-                // Fallback to a placeholder with DJ Khaled text
+            let imageLoaded = false;
+            
+            for (const imageUrl of imageUrls) {
+                try {
+                    await new Promise((resolve, reject) => {
+                        const testImg = new Image();
+                        testImg.onload = () => {
+                            img.src = imageUrl + '?v=' + Date.now();
+                            console.log('✅ Image loaded from:', imageUrl);
+                            imageLoaded = true;
+                            resolve();
+                        };
+                        testImg.onerror = () => {
+                            console.log('❌ Image failed from:', imageUrl);
+                            reject();
+                        };
+                        testImg.src = imageUrl;
+                    });
+                    break; // Success, exit loop
+                } catch (error) {
+                    // Continue to next URL
+                }
+            }
+            
+            if (!imageLoaded) {
+                // Enhanced fallback to show we're looking for the image
                 img.src = 'data:image/svg+xml;base64,' + btoa(`
                     <svg width="400" height="500" xmlns="http://www.w3.org/2000/svg">
                         <rect width="100%" height="100%" fill="#1a1a1a"/>
-                        <text x="50%" y="25%" font-family="Arial, sans-serif" font-size="28" fill="#ff4444" text-anchor="middle" font-weight="bold">ANOTHA ONE!</text>
-                        <text x="50%" y="40%" font-family="Arial, sans-serif" font-size="20" fill="#fff" text-anchor="middle">🎵 DJ KHALED 🎵</text>
-                        <text x="50%" y="55%" font-family="Arial, sans-serif" font-size="16" fill="#ccc" text-anchor="middle">We the best!</text>
-                        <text x="50%" y="75%" font-family="Arial, sans-serif" font-size="14" fill="#888" text-anchor="middle">Image not found - check console</text>
-                        <text x="50%" y="85%" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="middle">Files may need to be re-uploaded</text>
+                        <text x="50%" y="20%" font-family="Arial, sans-serif" font-size="24" fill="#ff4444" text-anchor="middle" font-weight="bold">ANOTHA ONE!</text>
+                        <text x="50%" y="35%" font-family="Arial, sans-serif" font-size="18" fill="#fff" text-anchor="middle">🎵 DJ KHALED 🎵</text>
+                        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="16" fill="#ccc" text-anchor="middle">We the best!</text>
+                        <text x="50%" y="70%" font-family="Arial, sans-serif" font-size="14" fill="#888" text-anchor="middle">Image file not found</text>
+                        <text x="50%" y="80%" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="middle">Check GitHub repo for:</text>
+                        <text x="50%" y="85%" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="middle">dj_khaled.png or dj-khaled.png</text>
+                        <text x="50%" y="92%" font-family="Arial, sans-serif" font-size="10" fill="#444" text-anchor="middle">Make sure file is committed to main branch</text>
                     </svg>
                 `);
-                console.log('🎨 Using fallback SVG image - original files not accessible');
+                console.log('🎨 Using fallback SVG - check your GitHub repo file names');
             }
             
             popup.style.display = 'flex';
