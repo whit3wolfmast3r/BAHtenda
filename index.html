@@ -395,7 +395,7 @@
                     }
                 });
                 
-                // 🚨 NEW: Listen for button press events (this triggers popup/sound on ALL devices)
+                // 🚨 NEW: Listen for button press events (this triggers popup/sound on OTHER devices)
                 const eventsRef = database.ref('bahtenda/events');
                 eventsRef.on('child_added', (snapshot) => {
                     const event = snapshot.val();
@@ -403,9 +403,9 @@
                     
                     // Only process events we haven't seen before
                     if (eventId !== lastEventId && event.type === 'button_press') {
-                        console.log('🚨 Remote button press detected! Playing sound and showing popup...');
+                        console.log('🚨 Remote button press detected! Playing sound and showing popup for EVERYONE...');
                         
-                        // Play sound and show popup for EVERYONE
+                        // Play sound and show popup for EVERYONE (including other users)
                         playClickSound();
                         showPopup();
                         
@@ -550,11 +550,12 @@
             // Update display immediately for the person who clicked
             updateDisplay();
             
-            // Save to cloud (will trigger popup/sound for ALL users including this one)
-            saveCountToCloud();
+            // Play sound and show popup immediately for the clicker
+            playClickSound();
+            showPopup();
             
-            // Note: We don't call playClickSound() or showPopup() here directly anymore
-            // because saveCountToCloud() will trigger the event that causes these to run on ALL devices
+            // Save to cloud and trigger event for OTHER users
+            saveCountToCloud();
         }
 
         function updateTallyMarks() {
@@ -710,30 +711,49 @@
             }
         });
 
-        // Keyboard support
+        // Keyboard support - FIXED to only work on main button, not in modals
         document.addEventListener('keydown', function(e) {
-            if (e.code === 'Space' || e.code === 'Enter') {
-                // Only trigger button if not in a modal
-                if (document.getElementById('resetModal').style.display !== 'flex') {
-                    e.preventDefault();
-                    anothaOne();
-                }
+            // Check if we're in any modal or input field
+            const resetModalOpen = document.getElementById('resetModal').style.display === 'flex';
+            const imagePopupOpen = document.getElementById('imagePopup').style.display === 'flex';
+            const activeElement = document.activeElement;
+            const isInInput = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA');
+            
+            // Only allow space/enter for main button if NOT in modal and NOT in input field
+            if ((e.code === 'Space' || e.code === 'Enter') && !resetModalOpen && !imagePopupOpen && !isInInput) {
+                e.preventDefault();
+                anothaOne();
             }
+            
+            // Escape always closes modals
             if (e.code === 'Escape') {
                 closePopup();
                 closeResetModal();
             }
         });
 
-        // Handle Enter key in password input
+        // Handle Enter key in password input - FIXED to not trigger main button
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize Firebase and load count
             initFirebase();
             
-            document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+            // Handle Enter key specifically in password input
+            const passwordInput = document.getElementById('passwordInput');
+            passwordInput.addEventListener('keydown', function(e) {
                 if (e.code === 'Enter') {
+                    e.preventDefault(); // Prevent any default behavior
+                    e.stopPropagation(); // Stop event from bubbling up
                     confirmReset();
                 }
+            });
+            
+            // Also prevent the password input from triggering the main button
+            passwordInput.addEventListener('keyup', function(e) {
+                e.stopPropagation(); // Stop event from bubbling up
+            });
+            
+            passwordInput.addEventListener('keypress', function(e) {
+                e.stopPropagation(); // Stop event from bubbling up
             });
         });
 
