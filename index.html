@@ -55,7 +55,6 @@
             color: white;
             border-radius: 15px;
             cursor: pointer;
-            box-shadow: 0 0 30px rgba(255, 68, 68, 0.6);
             transition: all 0.3s ease;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             animation: glow 2s ease-in-out infinite alternate;
@@ -72,7 +71,6 @@
 
         .anotha-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 60px rgba(255, 68, 68, 0.8);
         }
 
         .anotha-button:active {
@@ -143,7 +141,6 @@
             display: inline-block;
             margin: 0 2px;
             border-radius: 2px;
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .tally-diagonal {
@@ -156,7 +153,6 @@
             transform: rotate(45deg);
             transform-origin: left;
             border-radius: 2px;
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .counter-display {
@@ -172,7 +168,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: none;
+            background: rgba(0,0,0,0.5);
             display: none;
             justify-content: center;
             align-items: center;
@@ -250,7 +246,6 @@
             border-radius: 15px;
             text-align: center;
             border: 2px solid #444;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
             max-width: 400px;
         }
 
@@ -276,7 +271,6 @@
         .reset-modal input:focus {
             outline: none;
             border-color: #ff4444;
-            box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
         }
 
         .modal-buttons {
@@ -368,6 +362,7 @@
         let audioContext;
         let database;
         let isConnected = false;
+        let lastEventId = null; // Track the last event we processed
         
         // Firebase configuration - Your actual project values
         const firebaseConfig = {
@@ -389,7 +384,7 @@
                 isConnected = true;
                 console.log('🔥 Firebase connected successfully!');
                 
-                // Listen for real-time updates
+                // Listen for count updates
                 const countRef = database.ref('bahtenda/count');
                 countRef.on('value', (snapshot) => {
                     const newCount = snapshot.val() || 0;
@@ -397,6 +392,24 @@
                         count = newCount;
                         updateDisplay();
                         console.log('🔄 Count updated from cloud:', count);
+                    }
+                });
+                
+                // 🚨 NEW: Listen for button press events (this triggers popup/sound on ALL devices)
+                const eventsRef = database.ref('bahtenda/events');
+                eventsRef.on('child_added', (snapshot) => {
+                    const event = snapshot.val();
+                    const eventId = snapshot.key;
+                    
+                    // Only process events we haven't seen before
+                    if (eventId !== lastEventId && event.type === 'button_press') {
+                        console.log('🚨 Remote button press detected! Playing sound and showing popup...');
+                        
+                        // Play sound and show popup for EVERYONE
+                        playClickSound();
+                        showPopup();
+                        
+                        lastEventId = eventId;
                     }
                 });
                 
@@ -417,13 +430,22 @@
             }
         }
         
-        // Save count to Firebase
+        // Save count and trigger event for all users
         async function saveCountToCloud() {
             if (isConnected && database) {
                 try {
+                    // Save the count
                     await database.ref('bahtenda/count').set(count);
                     await database.ref('bahtenda/lastUpdated').set(Date.now());
-                    console.log('☁️ Count saved to cloud:', count);
+                    
+                    // 🚨 NEW: Trigger popup/sound event for ALL users
+                    await database.ref('bahtenda/events').push({
+                        type: 'button_press',
+                        timestamp: Date.now(),
+                        count: count
+                    });
+                    
+                    console.log('☁️ Count saved and event triggered for all users:', count);
                 } catch (error) {
                     console.log('❌ Failed to save to cloud:', error);
                 }
@@ -522,20 +544,17 @@
             console.log('🔴 Button clicked!'); // Debug log
             initAudio();
             
-            // Play sound first for immediate feedback
-            playClickSound();
-            
             count++;
             console.log('📊 Count is now:', count);
             
-            // Update display immediately
+            // Update display immediately for the person who clicked
             updateDisplay();
             
-            // Save to cloud (will update for all users)
+            // Save to cloud (will trigger popup/sound for ALL users including this one)
             saveCountToCloud();
             
-            // Show popup
-            showPopup();
+            // Note: We don't call playClickSound() or showPopup() here directly anymore
+            // because saveCountToCloud() will trigger the event that causes these to run on ALL devices
         }
 
         function updateTallyMarks() {
