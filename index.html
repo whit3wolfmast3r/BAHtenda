@@ -418,43 +418,74 @@
             }
         }
 
+        // Debug function to test file accessibility
+        async function testFiles() {
+            console.log('🔍 Testing file accessibility...');
+            
+            const filesToTest = [
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha_one.mp3',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha-one.mp3',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj-khaled.png',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj_khaled.png',
+                'https://github.com/whit3wolfmast3r/BAHtenda/raw/main/anotha_one.mp3',
+                'https://github.com/whit3wolfmast3r/BAHtenda/raw/main/dj-khaled.png'
+            ];
+            
+            for (const fileUrl of filesToTest) {
+                try {
+                    const response = await fetch(fileUrl, { method: 'HEAD' });
+                    if (response.ok) {
+                        console.log('✅ FOUND:', fileUrl);
+                    } else {
+                        console.log('❌ NOT FOUND:', fileUrl, 'Status:', response.status);
+                    }
+                } catch (error) {
+                    console.log('❌ ERROR accessing:', fileUrl, error.message);
+                }
+            }
+        }
+
         // Play DJ Khaled sound effect - Multiple attempts for better reliability
         async function playClickSound() {
-            console.log('Attempting to play sound...'); // Debug log
+            console.log('🎵 Attempting to play sound...'); // Debug log
             
-            // Try multiple approaches for better browser compatibility
+            // Test file accessibility first
+            await testFiles();
+            
+            // Try multiple file variations and methods
             const audioAttempts = [
-                // Direct file approach
+                // Try anotha_one.mp3 (with underscore)
                 async () => {
-                    const audio = new Audio();
-                    audio.preload = 'auto';
+                    const audio = new Audio('https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha_one.mp3?v=' + Date.now());
                     audio.volume = 0.8;
-                    audio.src = 'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha_one.mp3?v=' + Math.random();
-                    
-                    // Wait for audio to be ready
-                    await new Promise((resolve, reject) => {
-                        audio.addEventListener('canplaythrough', resolve, { once: true });
-                        audio.addEventListener('error', reject, { once: true });
-                        audio.load();
-                    });
-                    
                     await audio.play();
-                    console.log('✅ Audio played successfully!');
+                    console.log('✅ Audio played: anotha_one.mp3');
                     return true;
                 },
                 
-                // Alternative GitHub URL
+                // Try anotha-one.mp3 (with hyphen)
                 async () => {
-                    const audio = new Audio('https://github.com/whit3wolfmast3r/BAHtenda/raw/main/anotha_one.mp3?v=' + Math.random());
+                    const audio = new Audio('https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha-one.mp3?v=' + Date.now());
                     audio.volume = 0.8;
                     await audio.play();
-                    console.log('✅ Audio played from alternative URL!');
+                    console.log('✅ Audio played: anotha-one.mp3');
                     return true;
                 },
                 
-                // Fetch and play approach
+                // Try alternative GitHub URL
+                async () => {
+                    const audio = new Audio('https://github.com/whit3wolfmast3r/BAHtenda/raw/main/anotha_one.mp3?v=' + Date.now());
+                    audio.volume = 0.8;
+                    await audio.play();
+                    console.log('✅ Audio played from github.com URL');
+                    return true;
+                },
+                
+                // Fetch and create blob
                 async () => {
                     const response = await fetch('https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/anotha_one.mp3');
+                    if (!response.ok) throw new Error('Fetch failed: ' + response.status);
+                    
                     const audioBuffer = await response.arrayBuffer();
                     const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
                     const audioUrl = URL.createObjectURL(blob);
@@ -463,9 +494,8 @@
                     audio.volume = 0.8;
                     await audio.play();
                     
-                    // Clean up
                     setTimeout(() => URL.revokeObjectURL(audioUrl), 1000);
-                    console.log('✅ Audio played from blob!');
+                    console.log('✅ Audio played from blob');
                     return true;
                 }
             ];
@@ -476,7 +506,7 @@
                     await audioAttempts[i]();
                     return; // Success! Exit function
                 } catch (error) {
-                    console.log(`❌ Audio attempt ${i + 1} failed:`, error);
+                    console.log(`❌ Audio attempt ${i + 1} failed:`, error.message);
                 }
             }
             
@@ -596,34 +626,51 @@
             const popup = document.getElementById('imagePopup');
             const img = document.getElementById('popupImage');
             
-            // Try your exact image file with cache busting
-            const imageUrl = 'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj-khaled.png?v=' + Math.random();
+            // Test both image file variations
+            const imageUrls = [
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj-khaled.png',
+                'https://raw.githubusercontent.com/whit3wolfmast3r/BAHtenda/main/dj_khaled.png',
+                'https://github.com/whit3wolfmast3r/BAHtenda/raw/main/dj-khaled.png',
+                'https://github.com/whit3wolfmast3r/BAHtenda/raw/main/dj_khaled.png'
+            ];
             
-            try {
-                await new Promise((resolve, reject) => {
-                    const testImg = new Image();
-                    testImg.onload = () => {
-                        img.src = imageUrl;
-                        console.log('✅ Image loaded successfully!');
-                        resolve();
-                    };
-                    testImg.onerror = () => {
-                        console.log('❌ Image failed to load, using fallback');
-                        reject();
-                    };
-                    testImg.src = imageUrl;
-                });
-            } catch (error) {
+            let imageLoaded = false;
+            
+            for (const imageUrl of imageUrls) {
+                try {
+                    await new Promise((resolve, reject) => {
+                        const testImg = new Image();
+                        testImg.onload = () => {
+                            img.src = imageUrl + '?v=' + Date.now(); // Cache busting
+                            console.log('✅ Image loaded from:', imageUrl);
+                            imageLoaded = true;
+                            resolve();
+                        };
+                        testImg.onerror = () => {
+                            console.log('❌ Image failed from:', imageUrl);
+                            reject();
+                        };
+                        testImg.src = imageUrl;
+                    });
+                    break; // Success, exit loop
+                } catch (error) {
+                    // Continue to next URL
+                }
+            }
+            
+            if (!imageLoaded) {
                 // Fallback to a placeholder with DJ Khaled text
                 img.src = 'data:image/svg+xml;base64,' + btoa(`
                     <svg width="400" height="500" xmlns="http://www.w3.org/2000/svg">
                         <rect width="100%" height="100%" fill="#1a1a1a"/>
-                        <text x="50%" y="30%" font-family="Arial, sans-serif" font-size="32" fill="#ff4444" text-anchor="middle" font-weight="bold">ANOTHA ONE!</text>
-                        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="24" fill="#fff" text-anchor="middle">🎵 DJ KHALED 🎵</text>
-                        <text x="50%" y="70%" font-family="Arial, sans-serif" font-size="18" fill="#ccc" text-anchor="middle">We the best!</text>
+                        <text x="50%" y="25%" font-family="Arial, sans-serif" font-size="28" fill="#ff4444" text-anchor="middle" font-weight="bold">ANOTHA ONE!</text>
+                        <text x="50%" y="40%" font-family="Arial, sans-serif" font-size="20" fill="#fff" text-anchor="middle">🎵 DJ KHALED 🎵</text>
+                        <text x="50%" y="55%" font-family="Arial, sans-serif" font-size="16" fill="#ccc" text-anchor="middle">We the best!</text>
+                        <text x="50%" y="75%" font-family="Arial, sans-serif" font-size="14" fill="#888" text-anchor="middle">Image not found - check console</text>
+                        <text x="50%" y="85%" font-family="Arial, sans-serif" font-size="12" fill="#666" text-anchor="middle">Files may need to be re-uploaded</text>
                     </svg>
                 `);
-                console.log('🎨 Using fallback SVG image');
+                console.log('🎨 Using fallback SVG image - original files not accessible');
             }
             
             popup.style.display = 'flex';
